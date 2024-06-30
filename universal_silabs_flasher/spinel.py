@@ -6,6 +6,7 @@ import logging
 import typing
 
 import async_timeout
+from serial_asyncio import SerialTransport
 import zigpy.types
 
 from .common import SerialProtocol, Version, crc16_kermit
@@ -108,6 +109,14 @@ class SpinelProtocol(SerialProtocol):
         super().__init__()
         self._transaction_id: int = 1
         self._pending_frames: dict[int, asyncio.Future] = {}
+
+    def connection_made(self, transport: SerialTransport) -> None:
+        super().connection_made(transport)
+
+        # de-assert DTR/RTS, some dongles use these to reset device
+        if transport is not None:
+            transport.serial.dtr = False
+            transport.serial.rts = False
 
     def data_received(self, data: bytes) -> None:
         super().data_received(data)
