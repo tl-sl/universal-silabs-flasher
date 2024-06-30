@@ -36,6 +36,7 @@ class ProbeResult:
     version: Version | None
     continue_probing: bool
     baudrate: int
+    vendor: str | None = dataclasses.field(default=None)
 
 
 class Flasher:
@@ -153,10 +154,11 @@ class Flasher:
 
     async def probe_spinel(self, baudrate: int) -> ProbeResult:
         async with self._connect_spinel(baudrate) as spinel:
-            version = await spinel.probe()
+            version, vendor = await spinel.probe()
 
         return ProbeResult(
             version=version,
+            vendor=vendor,
             baudrate=baudrate,
             continue_probing=False,
         )
@@ -219,6 +221,7 @@ class Flasher:
             self.app_type = probe_method
             self.app_version = result.version
             self.app_baudrate = result.baudrate
+            self.app_vendor = result.vendor
             break
         else:
             if bootloader_probe and self._reset_target:
@@ -235,8 +238,9 @@ class Flasher:
                 raise RuntimeError("Failed to probe running application type")
 
         _LOGGER.info(
-            "Detected %s, version %s at %s baudrate (bootloader baudrate %s)",
+            "Detected %s, %s version %s at %s baudrate (bootloader baudrate %s)",
             self.app_type,
+            self.app_vendor if self.app_vendor else "",
             self.app_version,
             self.app_baudrate,
             self.bootloader_baudrate,

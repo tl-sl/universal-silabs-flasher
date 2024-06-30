@@ -248,7 +248,7 @@ class SpinelProtocol(SerialProtocol):
 
         return await self.send_frame(frame, **kwargs)
 
-    async def probe(self) -> Version:
+    async def probe(self) -> tuple[Version, str]:
         rsp = await self.send_command(
             CommandID.PROP_VALUE_GET,
             PropertyID.NCP_VERSION.serialize(),
@@ -261,9 +261,9 @@ class SpinelProtocol(SerialProtocol):
         version = version_string.rstrip(b"\x00").decode("ascii")
 
         # We strip off the date code to get something reasonably stable
-        short_version, _ = version.split(";", 1)
+        short_version, vendor, _ = version.split(";", 2)
 
-        return Version(short_version)
+        return Version(short_version), vendor.strip()
 
     async def enter_bootloader(self) -> None:
         await self.send_command(
