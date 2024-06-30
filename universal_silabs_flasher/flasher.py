@@ -260,6 +260,11 @@ class Flasher:
         elif self.app_type is ApplicationType.SPINEL:
             async with self._connect_spinel(self.app_baudrate) as spinel:
                 async with async_timeout.timeout(PROBE_TIMEOUT):
+                    if self.app_vendor and "EFR32" not in self.app_vendor:
+                        raise RuntimeError(
+                            "Flashing Thread firmware is only supported on "
+                            "EFR32 devices"
+                        )
                     await spinel.enter_bootloader()
         elif self.app_type is ApplicationType.EZSP:
             async with self._connect_ezsp(self.app_baudrate) as ezsp:
