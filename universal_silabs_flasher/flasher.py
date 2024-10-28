@@ -9,14 +9,9 @@ import async_timeout
 import bellows.config
 import bellows.ezsp
 import bellows.types
+from zigpy.serial import SerialProtocol
 
-from .common import (
-    PROBE_TIMEOUT,
-    SerialProtocol,
-    Version,
-    connect_protocol,
-    pad_to_multiple,
-)
+from .common import PROBE_TIMEOUT, Version, connect_protocol, pad_to_multiple
 from .const import DEFAULT_BAUDRATES, GPIO_CONFIGS, ApplicationType, ResetTarget
 from .cpc import CPCProtocol
 from .emberznet import connect_ezsp
@@ -115,8 +110,6 @@ class Flasher:
                 if run_firmware:
                     await gecko.run_firmware()
                     _LOGGER.info("Launched application from bootloader")
-
-            await asyncio.sleep(1)
         except NoFirmwareError:
             _LOGGER.warning("No application can be launched")
             return ProbeResult(

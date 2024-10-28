@@ -6,9 +6,10 @@ import logging
 import typing
 
 import async_timeout
+from zigpy.serial import SerialProtocol
 import zigpy.types
 
-from .common import SerialProtocol, Version, crc16_kermit
+from .common import Version, crc16_kermit
 from .spinel_types import CommandID, HDLCSpecial, PropertyID, ResetReason
 
 _LOGGER = logging.getLogger(__name__)
@@ -104,10 +105,17 @@ class SpinelFrame:
 
 
 class SpinelProtocol(SerialProtocol):
+    _buffer: bytearray
+
     def __init__(self) -> None:
         super().__init__()
         self._transaction_id: int = 1
         self._pending_frames: dict[int, asyncio.Future] = {}
+
+    def send_data(self, data: bytes) -> None:
+        assert self._transport is not None
+        _LOGGER.debug("Sending data %s", data)
+        self._transport.write(data)
 
     def data_received(self, data: bytes) -> None:
         super().data_received(data)
@@ -260,6 +268,3 @@ class SpinelProtocol(SerialProtocol):
             ResetReason.BOOTLOADER.serialize(),
             wait_response=False,
         )
-
-        # A small delay is necessary when switching baudrates
-        await asyncio.sleep(0.5)

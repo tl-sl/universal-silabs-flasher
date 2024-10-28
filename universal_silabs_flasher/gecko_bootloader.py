@@ -7,8 +7,9 @@ import re
 import typing
 
 import async_timeout
+from zigpy.serial import SerialProtocol
 
-from .common import PROBE_TIMEOUT, SerialProtocol, StateMachine, Version
+from .common import PROBE_TIMEOUT, StateMachine, Version
 from .xmodemcrc import send_xmodem128_crc
 
 _LOGGER = logging.getLogger(__name__)
@@ -141,6 +142,11 @@ class GeckoBootloaderProtocol(SerialProtocol):
 
         if self._upload_status != "complete":
             raise UploadError(self._upload_status)
+
+    def send_data(self, data: bytes) -> None:
+        assert self._transport is not None
+        _LOGGER.debug("Sending data %s", data)
+        self._transport.write(data)
 
     def data_received(self, data: bytes) -> None:
         super().data_received(data)

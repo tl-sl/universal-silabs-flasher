@@ -12,7 +12,6 @@ import typing
 import async_timeout
 import click
 import crc
-import serial_asyncio
 import zigpy.serial
 
 if typing.TYPE_CHECKING:
@@ -118,61 +117,6 @@ class StateMachine:
             self._futures_for_state[state].remove(future)
 
 
-class SerialProtocol(asyncio.Protocol):
-    """Base class for packet-parsing serial protocol implementations."""
-
-    def __init__(self) -> None:
-        self._buffer = bytearray()
-        self._transport: serial_asyncio.SerialTransport | None = None
-        self._connected_event = asyncio.Event()
-
-    async def wait_until_connected(self) -> None:
-        """Wait for the protocol's transport to be connected."""
-        await self._connected_event.wait()
-
-    def connection_made(self, transport: serial_asyncio.SerialTransport) -> None:
-        _LOGGER.debug("Connection made: %s", transport)
-
-        self._transport = transport
-        self._connected_event.set()
-
-    def send_data(self, data: bytes) -> None:
-        """Sends data over the connected transport."""
-        assert self._transport is not None
-        data = bytes(data)
-        _LOGGER.debug("Sending data %s", data)
-        self._transport.write(data)
-
-    def data_received(self, data: bytes) -> None:
-        _LOGGER.debug("Received data %s", data)
-        self._buffer += data
-
-    def disconnect(self) -> None:
-        if self._transport is not None:
-            self._transport.close()
-            self._buffer.clear()
-            self._connected_event.clear()
-
-
-def patch_pyserial_asyncio() -> None:
-    """Patches pyserial-asyncio's `SerialTransport` to support swapping protocols."""
-
-    if (
-        serial_asyncio.SerialTransport.get_protocol
-        is not asyncio.BaseTransport.get_protocol
-    ):
-        return
-
-    def get_protocol(self) -> asyncio.Protocol:
-        return self._protocol
-
-    def set_protocol(self, protocol: asyncio.Protocol) -> None:
-        self._protocol = protocol
-
-    serial_asyncio.SerialTransport.get_protocol = get_protocol
-    serial_asyncio.SerialTransport.set_protocol = set_protocol
-
-
 @contextlib.asynccontextmanager
 async def connect_protocol(port, baudrate, factory):
     loop = asyncio.get_running_loop()
@@ -189,10 +133,7 @@ async def connect_protocol(port, baudrate, factory):
     try:
         yield protocol
     finally:
-        protocol.disconnect()
-
-        # Required for Windows to be able to re-connect to the same serial port
-        await asyncio.sleep(0)
+        await protocol.disconnect()
 
 
 class CommaSeparatedNumbers(click.ParamType):
