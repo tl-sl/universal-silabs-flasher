@@ -17,8 +17,10 @@ Options:
   --bootloader-baudrate NUMBERS  [default: 115200]
   --cpc-baudrate NUMBERS         [default: 460800, 115200, 230400]
   --ezsp-baudrate NUMBERS        [default: 115200]
-  --spinel-baudrate NUMBERS      [default: 460800]
-  --probe-method TEXT            [default: bootloader, cpc, ezsp, spinel]
+  --router-baudrate NUMBERS       [default: 115200]
+  --spinel-baudrate NUMBERS       [default: 460800]
+  --probe-method TEXT             [default: bootloader, cpc, ezsp, spinel,
+                                  router]
   --bootloader-reset [yellow|ihost|slzb07|sonoff]
   --help                         Show this message and exit.
 
