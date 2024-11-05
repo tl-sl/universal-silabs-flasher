@@ -49,6 +49,7 @@ class Flasher:
             ApplicationType.GECKO_BOOTLOADER,
             ApplicationType.CPC,
             ApplicationType.EZSP,
+            ApplicationType.ROUTER,
             ApplicationType.SPINEL,
         ),
         device: str,
