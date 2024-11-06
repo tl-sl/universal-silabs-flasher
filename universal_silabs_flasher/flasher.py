@@ -284,7 +284,7 @@ class Flasher:
                     await spinel.enter_bootloader()
         elif self.app_type is ApplicationType.ROUTER:
             async with self._connect_router(self.app_baudrate) as router:
-                async with async_timeout.timeout(PROBE_TIMEOUT):
+                async with asyncio_timeout(PROBE_TIMEOUT):
                     await router.enter_bootloader()
         elif self.app_type is ApplicationType.EZSP:
             async with self._connect_ezsp(self.app_baudrate) as ezsp:

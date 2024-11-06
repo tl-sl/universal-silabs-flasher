@@ -5,10 +5,9 @@ import enum
 import logging
 import re
 
-import async_timeout
 from zigpy.serial import SerialProtocol
 
-from .common import PROBE_TIMEOUT, StateMachine, Version
+from .common import PROBE_TIMEOUT, StateMachine, Version, asyncio_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,7 +37,7 @@ class RouterProtocol(SerialProtocol):
 
     async def probe(self) -> Version:
         """Attempt to communicate with the router."""
-        async with async_timeout.timeout(PROBE_TIMEOUT):
+        async with asyncio_timeout(PROBE_TIMEOUT):
             return await self.router_info()
 
     async def router_info(self) -> Version:
