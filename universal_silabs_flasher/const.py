@@ -22,7 +22,6 @@ LEGACY_FIRMWARE_TYPE_REMAPPING = {
 }
 
 
-
 class ApplicationType(enum.Enum):
     GECKO_BOOTLOADER = "bootloader"
     CPC = "cpc"
