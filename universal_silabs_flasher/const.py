@@ -3,6 +3,7 @@ import enum
 
 class FirmwareImageType(enum.Enum):
     ZIGBEE_NCP = "zigbee_ncp"
+    ZIGBEE_ROUTER = "zigbee_router"
     OPENTHREAD_RCP = "openthread_rcp"
     ZWAVE_NCP = "zwave_ncp"
     BOOTLOADER = "bootloader"
@@ -26,6 +27,7 @@ class ApplicationType(enum.Enum):
     CPC = "cpc"
     EZSP = "ezsp"
     SPINEL = "spinel"
+    ROUTER = "router"
 
 
 FW_IMAGE_TYPE_TO_APPLICATION_TYPE = {
@@ -33,6 +35,7 @@ FW_IMAGE_TYPE_TO_APPLICATION_TYPE = {
     FirmwareImageType.MULTIPAN: ApplicationType.CPC,
     FirmwareImageType.OPENTHREAD_RCP: ApplicationType.SPINEL,
     FirmwareImageType.BOOTLOADER: ApplicationType.GECKO_BOOTLOADER,
+    FirmwareImageType.ZIGBEE_ROUTER: ApplicationType.ROUTER,
 }
 
 
@@ -41,6 +44,7 @@ DEFAULT_BAUDRATES = {
     ApplicationType.CPC: [460800, 115200, 230400],
     ApplicationType.EZSP: [115200],
     ApplicationType.SPINEL: [460800],
+    ApplicationType.ROUTER: [115200],
 }
 
 

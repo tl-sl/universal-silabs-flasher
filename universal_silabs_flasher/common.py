@@ -181,7 +181,7 @@ class VersionComponent:
 
 @functools.total_ordering
 class Version:
-    _SEPARATORS = {".", "-", "/", "_", " build "}
+    _SEPARATORS = {".", "-", "/", "_", " build ", " GA build "}
     _SEPARATORS_REGEX = re.compile(
         "(" + "|".join(re.escape(s) for s in _SEPARATORS) + ")"
     )

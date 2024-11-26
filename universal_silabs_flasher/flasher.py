@@ -24,6 +24,7 @@ from .emberznet import connect_ezsp
 from .firmware import FirmwareImage
 from .gecko_bootloader import GeckoBootloaderProtocol, NoFirmwareError
 from .gpio import find_gpiochip_by_label, send_gpio_pattern
+from .router import RouterProtocol
 from .spinel import SpinelProtocol
 from .xmodemcrc import BLOCK_SIZE as XMODEM_BLOCK_SIZE
 
@@ -48,6 +49,7 @@ class Flasher:
             ApplicationType.GECKO_BOOTLOADER,
             ApplicationType.CPC,
             ApplicationType.EZSP,
+            ApplicationType.ROUTER,
             ApplicationType.SPINEL,
         ),
         device: str,
@@ -103,6 +105,9 @@ class Flasher:
     def _connect_ezsp(self, baudrate: int):
         return connect_ezsp(self._device, baudrate)
 
+    def _connect_router(self, baudrate: int):
+        return connect_protocol(self._device, baudrate, RouterProtocol)
+
     def _connect_spinel(self, baudrate: int):
         return connect_protocol(self._device, baudrate, SpinelProtocol)
 
@@ -146,6 +151,16 @@ class Flasher:
 
         return ProbeResult(
             version=Version(version),
+            baudrate=baudrate,
+            continue_probing=False,
+        )
+
+    async def probe_router(self, baudrate: int) -> ProbeResult:
+        async with self._connect_router(baudrate) as router:
+            version = await router.probe()
+
+        return ProbeResult(
+            version=version,
             baudrate=baudrate,
             continue_probing=False,
         )
@@ -194,6 +209,7 @@ class Flasher:
             ApplicationType.CPC: self.probe_cpc,
             ApplicationType.EZSP: self.probe_ezsp,
             ApplicationType.SPINEL: self.probe_spinel,
+            ApplicationType.ROUTER: self.probe_router,
         }
 
         for probe_method, baudrate in (
@@ -266,6 +282,10 @@ class Flasher:
             async with self._connect_spinel(self.app_baudrate) as spinel:
                 async with asyncio_timeout(PROBE_TIMEOUT):
                     await spinel.enter_bootloader()
+        elif self.app_type is ApplicationType.ROUTER:
+            async with self._connect_router(self.app_baudrate) as router:
+                async with asyncio_timeout(PROBE_TIMEOUT):
+                    await router.enter_bootloader()
         elif self.app_type is ApplicationType.EZSP:
             async with self._connect_ezsp(self.app_baudrate) as ezsp:
                 try:

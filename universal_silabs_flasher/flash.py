@@ -124,6 +124,12 @@ class SerialPort(click.ParamType):
     show_default=True,
 )
 @click.option(
+    "--router-baudrate",
+    default=DEFAULT_BAUDRATES[ApplicationType.ROUTER],
+    type=CommaSeparatedNumbers(),
+    show_default=True,
+)
+@click.option(
     "--spinel-baudrate",
     default=DEFAULT_BAUDRATES[ApplicationType.SPINEL],
     type=CommaSeparatedNumbers(),
@@ -149,6 +155,7 @@ def main(
     bootloader_baudrate: list[int],
     cpc_baudrate: list[int],
     ezsp_baudrate: list[int],
+    router_baudrate: list[int],
     spinel_baudrate: list[int],
     probe_method: list[ApplicationType],
     bootloader_reset: str | None,
@@ -190,6 +197,7 @@ def main(
                 ApplicationType.GECKO_BOOTLOADER: bootloader_baudrate,
                 ApplicationType.CPC: cpc_baudrate,
                 ApplicationType.EZSP: ezsp_baudrate,
+                ApplicationType.ROUTER: router_baudrate,
                 ApplicationType.SPINEL: spinel_baudrate,
             },
             probe_methods=probe_method,
@@ -341,6 +349,8 @@ async def flash(
 
     if flasher.app_type == ApplicationType.EZSP:
         running_image_type = FirmwareImageType.ZIGBEE_NCP
+    elif flasher.app_type == ApplicationType.ROUTER:
+        running_image_type = FirmwareImageType.ZIGBEE_ROUTER
     elif flasher.app_type == ApplicationType.SPINEL:
         running_image_type = FirmwareImageType.OPENTHREAD_RCP
     elif flasher.app_type == ApplicationType.CPC:
